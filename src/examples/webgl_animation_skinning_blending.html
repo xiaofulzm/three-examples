@@ -1,103 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <title>three.js webgl - animation - skinning</title>
   <style>
-      body {
-        margin: 0;
-        background-color: #000;
-        color: #fff;
-        font-family: Monospace;
-        font-size: 13px;
-        line-height: 24px;
-        overscroll-behavior: none;
-      }
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: Monospace;
+      font-size: 13px;
+      line-height: 24px;
+      overscroll-behavior: none;
+    }
 
-      a {
-        color: #ff0;
-        text-decoration: none;
-      }
+    a {
+      color: #ff0;
+      text-decoration: none;
+    }
 
-      a:hover {
-        text-decoration: underline;
-      }
+    a:hover {
+      text-decoration: underline;
+    }
 
-      button {
-        cursor: pointer;
-        text-transform: uppercase;
-      }
+    button {
+      cursor: pointer;
+      text-transform: uppercase;
+    }
 
-      #info {
-        position: absolute;
-        top: 0px;
-        width: 100%;
-        padding: 10px;
-        box-sizing: border-box;
-        text-align: center;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        pointer-events: none;
-        z-index: 1; /* TODO Solve this in HTML */
-      }
+    #info {
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      pointer-events: none;
+      z-index: 1;
+      /* TODO Solve this in HTML */
+    }
 
-      a, button, input, select {
-        pointer-events: auto;
-      }
+    a,
+    button,
+    input,
+    select {
+      pointer-events: auto;
+    }
 
-      .lil-gui {
-        z-index: 2 !important; /* TODO Solve this in HTML */
-      }
+    .lil-gui {
+      z-index: 2 !important;
+      /* TODO Solve this in HTML */
+    }
 
-      @media all and ( max-width: 640px ) {
-        .lil-gui.root { 
-          right: auto;
-          top: auto;
-          max-height: 50%;
-          max-width: 80%;
-          bottom: 0;
-          left: 0;
-        }
-      }
-
-      #overlay {
-        position: absolute;
-        font-size: 16px;
-        z-index: 2;
-        top: 0;
+    @media all and (max-width: 640px) {
+      .lil-gui.root {
+        right: auto;
+        top: auto;
+        max-height: 50%;
+        max-width: 80%;
+        bottom: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        background: rgba(0,0,0,0.7);
       }
+    }
 
-        #overlay button {
-          background: transparent;
-          border: 0;
-          border: 1px solid rgb(255, 255, 255);
-          border-radius: 4px;
-          color: #ffffff;
-          padding: 12px 18px;
-          text-transform: uppercase;
-          cursor: pointer;
-        }
+    #overlay {
+      position: absolute;
+      font-size: 16px;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.7);
+    }
 
-      #notSupported {
-        width: 50%;
-        margin: auto;
-        background-color: #f00;
-        margin-top: 20px;
-        padding: 10px;
-      }
+    #overlay button {
+      background: transparent;
+      border: 0;
+      border: 1px solid rgb(255, 255, 255);
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 12px 18px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    #notSupported {
+      width: 50%;
+      margin: auto;
+      background-color: #f00;
+      margin-top: 20px;
+      padding: 10px;
+    }
   </style>
+
 <body>
   <script type="importmap">
     {
@@ -108,9 +115,9 @@
       }
     }
   </script>
-  <script type="module" >
+  <script type="module">
 
-    import { 
+    import {
       WebGLRenderer,
       PerspectiveCamera,
       Scene,
@@ -125,7 +132,10 @@
       MeshPhongMaterial,
       SkeletonHelper,
       AnimationMixer,
-      Clock
+      Clock,
+      KeyframeTrack,
+      AnimationClip,
+      LoopOnce
     } from 'three';
 
     // import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js?';
@@ -136,243 +146,242 @@
 
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js?';
 
-		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    
-		import Stats from 'three/addons/libs/stats.module.js';
-		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 
-    let camera,scene,renderer,stats;
-    let model,skeleton,mixer,clock;
+    let camera, scene, renderer, stats;
+    let model, skeleton, mixer, clock;
 
-    let actions,settings
+    let actions, settings
     let idleAction, walkAction, runAction;
     let idleWeight, walkWeight, runWeight;
 
     const crossFadeControls = [];
 
     let singleStepMode = false;  // 单步模式
-		let sizeOfNextStep = 0; //  步帧大小
+    let sizeOfNextStep = 0; //  步帧大小
 
 
 
     init()
     // 初始化 
-    function init(){
+    function init() {
 
-        clock = new Clock();
+      clock = new Clock();
 
-        // 透视投影相机
-        const fov = 45;  //相机视锥体竖直方向视野角度
-        const aspect = window.innerWidth / window.innerHeight; // 相机视锥体长宽比
-        const near = 1; // 相机视锥体近端面
-        const far = 100; // 相机视锥体远端面
+      // 透视投影相机
+      const fov = 45;  //相机视锥体竖直方向视野角度
+      const aspect = window.innerWidth / window.innerHeight; // 相机视锥体长宽比
+      const near = 1; // 相机视锥体近端面
+      const far = 100; // 相机视锥体远端面
 
-        camera = new PerspectiveCamera( fov, aspect, near, far );
-				camera.position.set(1,2,- 3); // 相机位置
-				camera.lookAt( 0, 1, 0 ); // 相机观察目标位置
+      camera = new PerspectiveCamera(fov, aspect, near, far);
+      camera.position.set(-26, 18, 20); // 相机位置
+      camera.lookAt(0, 1, 0); // 相机观察目标位置
 
-        // 场景
-        scene = new Scene();
-        scene.background = new Color(0xa0a0a0); // 设置场景颜色
-        scene.fog = new Fog(0xa0a0a0, 10, 50 ); // 添加线性雾  0xa0a0a0  0x0000ff
+      // 场景
+      scene = new Scene();
+      scene.background = new Color(0xa0a0a0); // 设置场景颜色
+      scene.fog = new Fog(0xa0a0a0, 10, 50); // 添加线性雾  0xa0a0a0  0x0000ff
 
 
-        // 渲染函数
-        renderer = new WebGLRenderer({ 
-          antialias: true  // 执行抗锯齿
-        })
-        renderer.setPixelRatio( window.devicePixelRatio ); //像素比
-				renderer.setSize( window.innerWidth, window.innerHeight ); // 画布尺寸
-        renderer.shadowMap.enabled = true;  // 允许光源阴影渲染(允许在场景中使用阴影贴图) 
-        document.body.append(renderer.domElement) // 添加到页面中
+      // 渲染函数
+      renderer = new WebGLRenderer({
+        antialias: true  // 执行抗锯齿
+      })
+      renderer.setPixelRatio(window.devicePixelRatio); //像素比
+      renderer.setSize(window.innerWidth, window.innerHeight); // 画布尺寸
+      renderer.shadowMap.enabled = true;  // 允许光源阴影渲染(允许在场景中使用阴影贴图) 
+      document.body.append(renderer.domElement) // 添加到页面中
 
-        // 添加半球光
-        const hemiLight = new HemisphereLight( 0xffffff, 0x8d8d8d, 3 );
-				hemiLight.position.set( 0, 20, 0 );
-				// scene.add( hemiLight );
-        
-        // 添加半球光辅助工具
-        const helper = new HemisphereLightHelper(hemiLight, 5 );
-        // scene.add( helper );
-        
-        // 添加平行光
-        const dirLight = new DirectionalLight( 0xffffff, 3 );
-				dirLight.position.set( - 3, 10, - 10 );
-				dirLight.castShadow = true; //  // 平行光设置产生阴影的光源对象,开启光源阴影的计算功能
-				dirLight.shadow.camera.top = 2; // 设置阴影参数
-				dirLight.shadow.camera.bottom = - 2;
-				dirLight.shadow.camera.left = - 2;
-				dirLight.shadow.camera.right = 2;
-				dirLight.shadow.camera.near = 0.1;
-				dirLight.shadow.camera.far = 40;
-				scene.add( dirLight );
-        
-        //  添加平面
-        const mesh = new Mesh( new PlaneGeometry( 100, 100 ), new MeshPhongMaterial( {
-          color: 0xcbcbcb,
-          depthWrite: false  // 渲染此材质是否对深度缓冲区有任何影响
-        })); 
-				mesh.rotation.x = - Math.PI / 2;
-				mesh.receiveShadow = true; // // 设置接收阴影的投影面
-				scene.add( mesh );
+      // 添加半球光
+      const hemiLight = new HemisphereLight(0xffffff, 0x8d8d8d, 3);
+      hemiLight.position.set(0, 20, 0);
+      // scene.add( hemiLight );
 
-        // AxesHelper：辅助观察的坐标系
-        const axesHelper = new AxesHelper(150);
-        // scene.add(axesHelper);
+      // 添加半球光辅助工具
+      const helper = new HemisphereLightHelper(hemiLight, 5);
+      // scene.add( helper );
 
-        // 设置相机控件轨道控制器OrbitControls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.target.set( 0, 1, 0); ////与lookAt参数保持一致
-        controls.update();
-        controls.addEventListener('change', function () { //监听鼠标、键盘事件
-          //相机位置与目标观察点距离
-            renderer.render(scene, camera);
+      // 添加平行光
+      const dirLight = new DirectionalLight(0xffffff, 3);
+      dirLight.position.set(- 3, 10, - 10);
+      dirLight.castShadow = true; //  // 平行光设置产生阴影的光源对象,开启光源阴影的计算功能
+      dirLight.shadow.camera.top = 2; // 设置阴影参数
+      dirLight.shadow.camera.bottom = - 2;
+      dirLight.shadow.camera.left = - 2;
+      dirLight.shadow.camera.right = 2;
+      dirLight.shadow.camera.near = 0.1;
+      dirLight.shadow.camera.far = 40;
+      scene.add(dirLight);
+
+      //  添加平面
+      const mesh = new Mesh(new PlaneGeometry(100, 100), new MeshPhongMaterial({
+        color: 0xcbcbcb,
+        depthWrite: false  // 渲染此材质是否对深度缓冲区有任何影响
+      }));
+      mesh.rotation.x = - Math.PI / 2;
+      mesh.receiveShadow = true; // // 设置接收阴影的投影面
+      scene.add(mesh);
+
+      // AxesHelper：辅助观察的坐标系
+      const axesHelper = new AxesHelper(150);
+      // scene.add(axesHelper);
+
+      // 设置相机控件轨道控制器OrbitControls
+      // const controls = new OrbitControls(camera, renderer.domElement);
+      // controls.target.set(0, 1, 0); ////与lookAt参数保持一致
+      // controls.update();
+      // controls.addEventListener('change', function () { //监听鼠标、键盘事件
+      //   //相机位置与目标观察点距离
+      //   renderer.render(scene, camera);
+      // });
+
+      const loader = new GLTFLoader(); // gltf 加载器
+      // 加载士兵模型
+      loader.load("../models/gltf/Soldier.glb", function (gltf) {
+        model = gltf.scene;
+        scene.add(model);
+        console.log(gltf);
+        model.traverse(function (object) {
+
+          if (object.isMesh) object.castShadow = true;  // 设置产生投影的网格模型
+
         });
 
-        const loader = new GLTFLoader(); // gltf 加载器
-        // 加载士兵模型
-        loader.load("../models/gltf/Soldier.glb", function (gltf) {
-            model = gltf.scene;
-					  scene.add(model);
-            console.log(gltf);
-            model.traverse( function ( object ) {
-            
-              if ( object.isMesh ) object.castShadow = true;  // 设置产生投影的网格模型
+        // 可视化骨骼关节
+        skeleton = new SkeletonHelper(model);
+        skeleton.visible = false;
+        scene.add(skeleton);
 
-            });
+        createPanel();
 
-            // 可视化骨骼关节
-            skeleton = new SkeletonHelper( model );
-            skeleton.visible = false;
-            scene.add( skeleton );
+        const animations = gltf.animations;
 
-            createPanel();
+        //包含关键帧动画的模型作为参数创建一个播放器
+        mixer = new AnimationMixer(model);
+        // animations[0]休息
+        // animations[1]跑步
+        // animations[2]静止展开
+        // animations[3]走路
 
+        idleAction = mixer.clipAction(animations[0]);
+        walkAction = mixer.clipAction(animations[3]);
+        runAction = mixer.clipAction(animations[1]);
 
-            const animations = gltf.animations;
+        actions = [idleAction, walkAction, runAction];
 
-            //包含关键帧动画的模型作为参数创建一个播放器
-            mixer = new AnimationMixer(model);
-            // animations[0]休息
-            // animations[1]跑步
-            // animations[2]静止展开
-            // animations[3]走路
+        activateAllActions()
 
-            idleAction = mixer.clipAction( animations[0] );
-            walkAction = mixer.clipAction( animations[3] );
-            runAction = mixer.clipAction( animations[1] );
+        animate()
+        cameraAnimation()
+      })
 
-            actions = [ idleAction, walkAction, runAction ];
+      // 显示电脑渲染帧率
+      stats = new Stats();
+      document.body.appendChild(stats.dom);
 
-            activateAllActions()
-
-            animate()
-
-        })
-
-        // 显示电脑渲染帧率
-        stats = new Stats();
-				document.body.appendChild( stats.dom );
-
-        // onresize 事件会在窗口被调整大小时发生
-        window.addEventListener( 'resize', onWindowResize );
+      // onresize 事件会在窗口被调整大小时发生
+      window.addEventListener('resize', onWindowResize);
 
     }
 
     // gui 设置
-    function  createPanel(){
+    function createPanel() {
 
-      const panel = new GUI( { width: 310 } );
+      const panel = new GUI({ width: 310 });
       // 添加分组
-			const folder1 = panel.addFolder( '显示' );
-			const folder2 = panel.addFolder( '动画' );
-			const folder3 = panel.addFolder( '动画交替' );
-			const folder4 = panel.addFolder( '动画权重' );
-			const folder5 = panel.addFolder( '倍速' );
+      const folder1 = panel.addFolder('显示');
+      const folder2 = panel.addFolder('动画');
+      const folder3 = panel.addFolder('动画交替');
+      const folder4 = panel.addFolder('动画权重');
+      const folder5 = panel.addFolder('倍速');
 
 
       settings = {
-          "显示模型":true,
-          "显示骨骼":false,
-          '停止': deactivateAllActions,
-          '开始': activateAllActions,
-          '暂停/继续': pauseContinue,
-          '单步模式': toSingleStepMode,
-          '单步大小': 0.05,
-          '从步行到暂停': function () {
-              prepareCrossFade( walkAction, idleAction, 1.0 );
-          },
-          '从暂停到步行': function () {
-              prepareCrossFade( idleAction ,walkAction, 0.5 );
-          },
-          '从步行到跑步': function () {
-            prepareCrossFade( walkAction, runAction, 2.5 );
-          },
-          '从跑步到步行': function () {
-            prepareCrossFade( runAction, walkAction, 5.0 );
-          },
-					'默认持续时间': true,
-          '自定义持续时间': 3.5,
-					'休息权重': 0.0,
-					'走路权重': 1.0,
-					'跑步权重': 0.0,
-					'动画倍速': 1.0
+        "显示模型": true,
+        "显示骨骼": false,
+        '停止': deactivateAllActions,
+        '开始': activateAllActions,
+        '暂停/继续': pauseContinue,
+        '单步模式': toSingleStepMode,
+        '单步大小': 0.05,
+        '从步行到暂停': function () {
+          prepareCrossFade(walkAction, idleAction, 1.0);
+        },
+        '从暂停到步行': function () {
+          prepareCrossFade(idleAction, walkAction, 0.5);
+        },
+        '从步行到跑步': function () {
+          prepareCrossFade(walkAction, runAction, 2.5);
+        },
+        '从跑步到步行': function () {
+          prepareCrossFade(runAction, walkAction, 5.0);
+        },
+        '默认持续时间': true,
+        '自定义持续时间': 3.5,
+        '休息权重': 0.0,
+        '走路权重': 1.0,
+        '跑步权重': 0.0,
+        '动画倍速': 1.0
 
       }
-      
-      folder1.add(settings,'显示模型').onChange( (visible)=>{model.visible = visible} );
-      folder1.add(settings,'显示骨骼').onChange( (visible)=>{skeleton.visible = visible} );
 
-      folder2.add(settings,'停止')
-      folder2.add(settings,'开始')
+      folder1.add(settings, '显示模型').onChange((visible) => { model.visible = visible });
+      folder1.add(settings, '显示骨骼').onChange((visible) => { skeleton.visible = visible });
+
+      folder2.add(settings, '停止')
+      folder2.add(settings, '开始')
       folder2.add(settings, '暂停/继续');
       folder2.add(settings, '单步模式');
-      folder2.add( settings, '单步大小', 0.01, 0.1, 0.001 );
+      folder2.add(settings, '单步大小', 0.01, 0.1, 0.001);
 
-      crossFadeControls.push( folder3.add( settings, '从步行到暂停' ) );
-      crossFadeControls.push( folder3.add( settings, '从暂停到步行' ) );
-      crossFadeControls.push( folder3.add( settings, '从步行到跑步' ) );
-      crossFadeControls.push( folder3.add( settings, '从跑步到步行' ) );
-      folder3.add(settings,'默认持续时间')
-      folder3.add(settings,'自定义持续时间', 0, 10, 0.01 )
+      crossFadeControls.push(folder3.add(settings, '从步行到暂停'));
+      crossFadeControls.push(folder3.add(settings, '从暂停到步行'));
+      crossFadeControls.push(folder3.add(settings, '从步行到跑步'));
+      crossFadeControls.push(folder3.add(settings, '从跑步到步行'));
+      folder3.add(settings, '默认持续时间')
+      folder3.add(settings, '自定义持续时间', 0, 10, 0.01)
 
-      folder4.add(settings,'休息权重',0.0, 1.0, 0.01).listen().onChange(function(weight){
-          setWeight( idleAction, weight );
+      folder4.add(settings, '休息权重', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
+        setWeight(idleAction, weight);
       })
-      folder4.add(settings,'走路权重',0.0, 1.0, 0.01).listen().onChange(function(weight){
-          setWeight( walkAction, weight );
+      folder4.add(settings, '走路权重', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
+        setWeight(walkAction, weight);
       })
-      folder4.add(settings,'跑步权重',0.0, 1.0, 0.01).listen().onChange(function(weight){
-          setWeight( runAction, weight );
+      folder4.add(settings, '跑步权重', 0.0, 1.0, 0.01).listen().onChange(function (weight) {
+        setWeight(runAction, weight);
       })
 
-      folder5.add( settings, '动画倍速', 0.0, 1.5, 0.01 ).onChange( modifyTimeScale );
+      folder5.add(settings, '动画倍速', 0.0, 1.5, 0.01).onChange(modifyTimeScale);
 
     }
 
     // 模型是否可见
-    function showModel(visible){
+    function showModel(visible) {
       model.visible = visible
     }
 
     // 设置倍速动画
-    function modifyTimeScale( speed ) {
+    function modifyTimeScale(speed) {
 
       mixer.timeScale = speed;
 
     }
 
     // 暂停动画/继续动画
-    function  pauseContinue (){
+    function pauseContinue() {
 
-      if(singleStepMode){
+      if (singleStepMode) {
         singleStepMode = false;
         unPauseAllActions()
-      }else{
-        if(idleAction.paused){
+      } else {
+        if (idleAction.paused) {
           unPauseAllActions();
-        }else{
+        } else {
           pauseAllActions()
         }
       }
@@ -381,14 +390,14 @@
 
     // 暂停动画
     function pauseAllActions() {
-      actions.forEach( function ( action ) {
+      actions.forEach(function (action) {
         action.paused = true;
-      } );
+      });
     }
 
     // 继续动画
     function unPauseAllActions() {
-      actions.forEach( function ( action ) {
+      actions.forEach(function (action) {
         action.paused = false;
       });
     }
@@ -396,94 +405,94 @@
     // 开始单步模式
     function toSingleStepMode() {
 
-        unPauseAllActions();
-        singleStepMode = true;
-        sizeOfNextStep = settings[ '单步大小' ];
+      unPauseAllActions();
+      singleStepMode = true;
+      sizeOfNextStep = settings['单步大小'];
 
     }
 
     // 停止动画
-    function deactivateAllActions(){
-      actions.forEach( function ( action ) {
-          action.stop();
+    function deactivateAllActions() {
+      actions.forEach(function (action) {
+        action.stop();
       });
     }
 
     //  播放动画
     function activateAllActions() {
       // 设置默认动画权重
-      setWeight( idleAction, settings[ '休息权重' ] );
-      setWeight( walkAction, settings[ '走路权重' ] );
-      setWeight( runAction, settings[ '跑步权重' ] );
+      setWeight(idleAction, settings['休息权重']);
+      setWeight(walkAction, settings['走路权重']);
+      setWeight(runAction, settings['跑步权重']);
 
-      actions.forEach( function ( action ) {
+      actions.forEach(function (action) {
         action.play();
-      } );
+      });
 
     }
     // 设置动画权重
-    function setWeight( action, weight ) {
+    function setWeight(action, weight) {
 
-        action.enabled = true;  // 值设为false会禁用动作, 也就是无效.默认值是true
-        action.setEffectiveTimeScale(1); // 设置动画倍速
-        action.setEffectiveWeight(weight); // 设置动画权重
+      action.enabled = true;  // 值设为false会禁用动作, 也就是无效.默认值是true
+      action.setEffectiveTimeScale(1); // 设置动画倍速
+      action.setEffectiveWeight(weight); // 设置动画权重
 
     }
 
-    function prepareCrossFade( startAction, endAction, defaultDuration ) {
-        
-        // 切换交替时间
-        const duration = setCrossFadeDuration( defaultDuration );
-        
-        // 确保不是单步模式, 并确定是运动的
-        singleStepMode = false; 
-        unPauseAllActions();
+    function prepareCrossFade(startAction, endAction, defaultDuration) {
 
-        // 设置动作交替动画
-        if ( startAction === idleAction ) {
-          executeCrossFade( startAction, endAction, duration );
-        } else {
-          synchronizeCrossFade( startAction, endAction, duration );
+      // 切换交替时间
+      const duration = setCrossFadeDuration(defaultDuration);
 
-        }
+      // 确保不是单步模式, 并确定是运动的
+      singleStepMode = false;
+      unPauseAllActions();
+
+      // 设置动作交替动画
+      if (startAction === idleAction) {
+        executeCrossFade(startAction, endAction, duration);
+      } else {
+        synchronizeCrossFade(startAction, endAction, duration);
+
+      }
 
     }
 
     // 设置交替时间
-    function setCrossFadeDuration( defaultDuration ) {
+    function setCrossFadeDuration(defaultDuration) {
 
-        if ( settings['默认持续时间'] ) {
-          return defaultDuration;
-        } else {
-          return settings[ '自定义持续时间' ];
-        }
+      if (settings['默认持续时间']) {
+        return defaultDuration;
+      } else {
+        return settings['自定义持续时间'];
+      }
 
     }
 
     // startAction  上一次动画
     // endAction  下一次需要切换的动画
     // duration  切换动画时间
-    function executeCrossFade( startAction, endAction, duration ) {
+    function executeCrossFade(startAction, endAction, duration) {
 
-      setWeight( endAction, 1 );
+      setWeight(endAction, 1);
       endAction.time = 0;
 
       // 设置动作淡入淡出
-      startAction.crossFadeTo( endAction, duration, true );
+      startAction.crossFadeTo(endAction, duration, true);
 
     }
 
     // 监听交替动作
-    function synchronizeCrossFade(startAction, endAction, duration ){  
+    function synchronizeCrossFade(startAction, endAction, duration) {
 
-      mixer.addEventListener( 'loop', onLoopFinished );
+      mixer.addEventListener('loop', onLoopFinished);
 
-      function onLoopFinished( event ) {
+      function onLoopFinished(event) {
 
-          if ( event.action === startAction ) {
-            mixer.removeEventListener( 'loop', onLoopFinished );
-            executeCrossFade( startAction, endAction, duration );
-          }
+        if (event.action === startAction) {
+          mixer.removeEventListener('loop', onLoopFinished);
+          executeCrossFade(startAction, endAction, duration);
+        }
       }
 
     }
@@ -494,70 +503,103 @@
       settings['休息权重'] = idleWeight;
       settings['走路权重'] = walkWeight;
       settings['跑步权重'] = runWeight;
-      
+
     }
 
     // 更新场景
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize( window.innerWidth, window.innerHeight );
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     // 更新gui动画交替的gui
     function updateCrossFadeControls() {
-      if ( idleWeight === 1 && walkWeight === 0 && runWeight === 0 ) { // 
+      if (idleWeight === 1 && walkWeight === 0 && runWeight === 0) { // 
 
-          crossFadeControls[ 0 ].disable();
-          crossFadeControls[ 1 ].enable();
-          crossFadeControls[ 2 ].disable();
-          crossFadeControls[ 3 ].disable();
+        crossFadeControls[0].disable();
+        crossFadeControls[1].enable();
+        crossFadeControls[2].disable();
+        crossFadeControls[3].disable();
 
-        }
+      }
 
-        if ( idleWeight === 0 && walkWeight === 1 && runWeight === 0 ) {
+      if (idleWeight === 0 && walkWeight === 1 && runWeight === 0) {
 
-          crossFadeControls[ 0 ].enable();
-          crossFadeControls[ 1 ].disable();
-          crossFadeControls[ 2 ].enable();
-          crossFadeControls[ 3 ].disable();
+        crossFadeControls[0].enable();
+        crossFadeControls[1].disable();
+        crossFadeControls[2].enable();
+        crossFadeControls[3].disable();
 
-        }
+      }
 
-        if ( idleWeight === 0 && walkWeight === 0 && runWeight === 1 ) {
+      if (idleWeight === 0 && walkWeight === 0 && runWeight === 1) {
 
-          crossFadeControls[ 0 ].disable();
-          crossFadeControls[ 1 ].disable();
-          crossFadeControls[ 2 ].disable();
-          crossFadeControls[ 3 ].enable();
+        crossFadeControls[0].disable();
+        crossFadeControls[1].disable();
+        crossFadeControls[2].disable();
+        crossFadeControls[3].enable();
 
-        }
+      }
     }
 
+    // 进入动画
+    function cameraAnimation() {
+        const times = [0, 8]; //时间轴上，设置三个时刻0、6秒
+        const values = [-26, 18, 20,1, 2, -3];
+        const posKF = new KeyframeTrack('.position', times, values);
+
+        const clip = new AnimationClip("fuCamera",8,[posKF]);
+
+        const mixerCamera = new AnimationMixer(camera);
+        const clipAction = mixerCamera.clipAction(clip);
+
+        // //.play()控制动画播放，默认循环播放
+        clipAction.loop = LoopOnce;
+        // 物体状态停留在动画结束的时候
+        clipAction.clampWhenFinished = true
+        clipAction.play();
+
+        // mixerCamera.addEventListener('finished', function (e) {
+          
+        // });
+
+        const clock = new Clock();
+        loop();
+        function loop() {
+          requestAnimationFrame(loop);
+          const frameT = clock.getDelta();
+          // 更新播放器相关的时间
+          mixerCamera.update(frameT);
+          camera.lookAt(0, 1, 0);
+
+        }
+      }
+
     // 循环渲染
-    function animate(){
+    function animate() {
 
       requestAnimationFrame(animate);
 
       // 获取动画权重
       idleWeight = idleAction.getEffectiveWeight();
-			walkWeight = walkAction.getEffectiveWeight();
-			runWeight = runAction.getEffectiveWeight();
+      walkWeight = walkAction.getEffectiveWeight();
+      runWeight = runAction.getEffectiveWeight();
 
-      updateWeightSliders(); 
+      updateWeightSliders();
 
       updateCrossFadeControls(); // 根据动画权重设置禁用gui
 
       let mixerUpdateDelta = clock.getDelta(); // 两帧渲染时间间隔(毫秒)
 
-       //   处于单步模式下, 只执行一步
-			if ( singleStepMode ) {
-          mixerUpdateDelta = sizeOfNextStep;
-          sizeOfNextStep = 0;
+      //   处于单步模式下, 只执行一步
+      if (singleStepMode) {
+        mixerUpdateDelta = sizeOfNextStep;
+        sizeOfNextStep = 0;
       }
 
       // 更新播放器相关的时间
-			mixer.update(mixerUpdateDelta);
+      mixer.update(mixerUpdateDelta);
 
       stats.update();
       renderer.render(scene, camera); //执行渲染操作
@@ -567,4 +609,5 @@
 
   </script>
 </body>
+
 </html>
