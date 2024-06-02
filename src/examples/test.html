@@ -1,11 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>three.js webgl - animation - skinning</title>
+  <link type="text/css" rel="stylesheet" href="main.css">
+
+
 <body>
-    <div style="color: #fff;" >测试</div>
+  <script type="importmap">
+    {
+      "imports": {
+        
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+
+    import {
+      WebGLRenderer,
+      PerspectiveCamera,
+      Scene,
+      Fog,
+      Color,
+      AxesHelper,
+      HemisphereLight,
+      HemisphereLightHelper,
+      DirectionalLight,
+      Mesh,
+      PlaneGeometry,
+      MeshPhongMaterial,
+      SkeletonHelper,
+      AnimationMixer,
+      Clock,
+      KeyframeTrack,
+      AnimationClip,
+      LoopOnce
+    } from 'three';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js?';
+
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+
+  </script>
 </body>
+
 </html>

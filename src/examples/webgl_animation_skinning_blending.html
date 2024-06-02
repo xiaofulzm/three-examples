@@ -6,103 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <title>three.js webgl - animation - skinning</title>
+  <link type="text/css" rel="stylesheet" href="main.css">
   <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: #fff;
-      font-family: Monospace;
-      font-size: 13px;
-      line-height: 24px;
-      overscroll-behavior: none;
-    }
-
-    a {
-      color: #ff0;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    button {
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-
-    #info {
-      position: absolute;
-      top: 0px;
-      width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      text-align: center;
-      -moz-user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      pointer-events: none;
-      z-index: 1;
-      /* TODO Solve this in HTML */
-    }
-
-    a,
-    button,
-    input,
-    select {
-      pointer-events: auto;
-    }
-
-    .lil-gui {
-      z-index: 2 !important;
-      /* TODO Solve this in HTML */
-    }
-
-    @media all and (max-width: 640px) {
-      .lil-gui.root {
-        right: auto;
-        top: auto;
-        max-height: 50%;
-        max-width: 80%;
-        bottom: 0;
-        left: 0;
-      }
-    }
-
-    #overlay {
-      position: absolute;
-      font-size: 16px;
-      z-index: 2;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      background: rgba(0, 0, 0, 0.7);
-    }
-
-    #overlay button {
-      background: transparent;
-      border: 0;
-      border: 1px solid rgb(255, 255, 255);
-      border-radius: 4px;
-      color: #ffffff;
-      padding: 12px 18px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    #notSupported {
-      width: 50%;
-      margin: auto;
-      background-color: #f00;
-      margin-top: 20px;
-      padding: 10px;
-    }
+   
   </style>
 
 <body>
@@ -138,12 +44,6 @@
       LoopOnce
     } from 'three';
 
-    // import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js?';
-
-    // import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
-
-    // import Stats from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/libs/stats.module.js'
-
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js?';
 
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -152,7 +52,7 @@
     import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 
-    let camera, scene, renderer, stats;
+    let camera, scene, renderer, stats,axesHelper;
     let model, skeleton, mixer, clock;
 
     let actions, settings
@@ -200,7 +100,7 @@
       // 添加半球光
       const hemiLight = new HemisphereLight(0xffffff, 0x8d8d8d, 3);
       hemiLight.position.set(0, 20, 0);
-      // scene.add( hemiLight );
+      scene.add( hemiLight );
 
       // 添加半球光辅助工具
       const helper = new HemisphereLightHelper(hemiLight, 5);
@@ -228,24 +128,17 @@
       scene.add(mesh);
 
       // AxesHelper：辅助观察的坐标系
-      const axesHelper = new AxesHelper(150);
-      // scene.add(axesHelper);
+      axesHelper = new AxesHelper(150);
+      axesHelper.visible = false;
+      scene.add(axesHelper);
 
-      // 设置相机控件轨道控制器OrbitControls
-      // const controls = new OrbitControls(camera, renderer.domElement);
-      // controls.target.set(0, 1, 0); ////与lookAt参数保持一致
-      // controls.update();
-      // controls.addEventListener('change', function () { //监听鼠标、键盘事件
-      //   //相机位置与目标观察点距离
-      //   renderer.render(scene, camera);
-      // });
+     
 
       const loader = new GLTFLoader(); // gltf 加载器
       // 加载士兵模型
       loader.load("../models/gltf/Soldier.glb", function (gltf) {
         model = gltf.scene;
         scene.add(model);
-        console.log(gltf);
         model.traverse(function (object) {
 
           if (object.isMesh) object.castShadow = true;  // 设置产生投影的网格模型
@@ -302,6 +195,7 @@
 
 
       settings = {
+        "辅助坐标系":false,
         "显示模型": true,
         "显示骨骼": false,
         '停止': deactivateAllActions,
@@ -330,8 +224,10 @@
 
       }
 
+      folder1.add(settings,'辅助坐标系').onChange((visible) => { axesHelper.visible = visible });
       folder1.add(settings, '显示模型').onChange((visible) => { model.visible = visible });
       folder1.add(settings, '显示骨骼').onChange((visible) => { skeleton.visible = visible });
+      
 
       folder2.add(settings, '停止')
       folder2.add(settings, '开始')

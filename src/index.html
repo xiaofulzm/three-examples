@@ -10,53 +10,84 @@
         
     </style>
 </head>
-<body>
-    <div class="panel" id="panel" >
+<body> 
+    <div class="panel panel-fold" id="panel" >
         <ul class="p-list"  id="p-list"></ul>
         <svg  id="fold" t="1716129782261" class="fold-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="17449" width="40" height="40"><path d="M501.792 264.544c12.8 12.8 12.384 33.664-0.928 45.952l-192.864 177.984a32 32 0 0 0 0 47.04l192.864 177.984a31.872 31.872 0 1 1-43.36 46.72L242.016 558.72a64 64 0 0 1 0-93.504l215.488-201.44a31.872 31.872 0 0 1 44.288 0.736z m288 0c12.8 12.8 12.384 33.664-0.928 45.952l-192.864 177.984a32 32 0 0 0 0 47.04l192.864 177.984a31.872 31.872 0 1 1-43.36 46.72l-215.488-201.472a64 64 0 0 1 0-93.504l215.488-201.44a31.872 31.872 0 0 1 44.288 0.736z" fill="#ffffff" p-id="17450"></path></svg>
     </div>
-    <iframe class="viewer" src="./examples/webgl_animation_skinning_blending.html" ></iframe>
+    <iframe id="viewer" class="viewer" ></iframe>
     <script>
 
-        const foldDom = document.getElementById("fold")
+        const foldDom = document.getElementById("fold");
         const panelDom = document.getElementById("panel");
-        const plistDom = document.getElementById("p-list")
-        foldDom.addEventListener("click",()=>{
-            console.log('111111');
+        const plistDom = document.getElementById("p-list");
+        const viewer = document.getElementById("viewer");
+
+        let files;
+
+        let filesLength = 0, lastIndex = 0;
+
+        const viewerSrc = './examples/';
+        const screenshotsSrc ="./screenshots/";
+
+        foldDom.addEventListener("click",(event)=>{
             foldDom.classList.toggle("fold-icon-rotate");
             panelDom.classList.toggle("panel-fold");
         })
 
+        
 
         init();
         async function init(){
 
+            files = await (await fetch('files.json')).json();
+            filesLength = files.length;
 
-            const files = await (await fetch('files.json')).json();
+            setViewerSrc();
 
-            const oFragmeng = document.createDocumentFragment(); 
+            const oFragment = document.createDocumentFragment(); 
 
             for (const key in files) {
-                console.log(key);
+           
                 const obj = files[key];
                 const liDom = document.createElement("li");
                 liDom.classList.add('p-li')
-                console.log(liInnerHTML(obj));
-                liDom.innerHTML = liInnerHTML(obj)
-                oFragmeng.appendChild(liDom)
+                liDom.innerHTML = liInnerHTML(obj,key)
+                oFragment.appendChild(liDom)
 
             }
-            plistDom.appendChild(oFragmeng)
-            console.log(files);
+
+            plistDom.appendChild(oFragment)
+            plistDom.children[lastIndex].classList.add('current-li')
+            
         }
 
-        const screenshotsSrc ="./screenshots/"
-        function liInnerHTML(obj){
+        
+        function liInnerHTML(obj,index){
             return `
-                <img class="e_img" src="${screenshotsSrc}${obj.title}.jpg" />
-                <h6 class="e_h6" >${obj.title}</h6>
+                <div data-index='${index}' >
+                    <img class="e_img" src="${screenshotsSrc}${obj.title}.jpg" />
+                    <h6 class="e_h6" >${obj.name}</h6>
+                </div>
             `.trim()
         }
+
+        function setViewerSrc(index =0){
+            viewer.src = `${viewerSrc}${files[index].title}.html`;
+        }
+
+        plistDom.addEventListener("click",(event)=>{
+        
+            let current = event.target.offsetParent.dataset.index;
+
+            setViewerSrc(current)
+         
+            plistDom.children[lastIndex].classList.toggle('current-li');
+            plistDom.children[current].classList.toggle('current-li');
+
+            lastIndex = current;
+            
+        })
 
     </script>
 </body>

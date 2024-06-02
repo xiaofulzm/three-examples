@@ -1,8 +1,18 @@
 [
     {
         "title":"webgl_animation_skinning_blending",
+        "name":"士兵动画",
         "address":"",
         "original_address":"",
+        "keyword ":"animation",
+        "type":"webgl"
+    },
+    {
+        "title":"webgl_instancing_raycast",
+        "name":"射线拾取模型",
+        "address":"",
+        "original_address":"",
+        "keyword ":"raycast",
         "type":"webgl"
     }
 ]
