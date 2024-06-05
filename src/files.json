@@ -14,5 +14,13 @@
         "original_address":"",
         "keyword ":"raycast",
         "type":"webgl"
+    },
+    {
+        "title":"webgl_animation_keyframes",
+        "name":"小屋模型",
+        "address":"",
+        "original_address":"",
+        "keyword ":"DRACOLoader",
+        "type":"webgl"
     }
 ]

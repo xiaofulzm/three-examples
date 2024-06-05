@@ -31,11 +31,13 @@
         const screenshotsSrc ="./screenshots/";
 
         foldDom.addEventListener("click",(event)=>{
-            foldDom.classList.toggle("fold-icon-rotate");
-            panelDom.classList.toggle("panel-fold");
+            fold();
         })
 
-        
+        function fold(){
+            foldDom.classList.toggle("fold-icon-rotate");
+            panelDom.classList.toggle("panel-fold");
+        }
 
         init();
         async function init(){
@@ -86,6 +88,7 @@
             plistDom.children[current].classList.toggle('current-li');
 
             lastIndex = current;
+            fold();
             
         })
 

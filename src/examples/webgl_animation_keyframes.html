@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>three.js webgl - animation - skinning</title>
+  <link type="text/css" rel="stylesheet" href="main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/20.0.0/tween.umd.js"></script>
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+
+    import {
+      AxesHelper,
+      PerspectiveCamera,
+      Scene,
+      WebGLRenderer,
+      PMREMGenerator,
+      Color,
+      AnimationMixer,
+      Clock,
+      Vector3
+    } from 'three';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js?';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+    let camera,controls,scene,renderer,stats,mixer,model
+
+    const clock = new Clock();
+    init();
+
+    function init(){
+
+        camera = new PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
+				camera.position.set(1,-0.8,4)
+        
+        renderer = new WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        const pmremGenerator = new PMREMGenerator( renderer );  // 预处理环境贴图 保持分辨率以平滑地插入漫射照明，同时限制采样计算
+
+        scene = new Scene();
+        scene.background = new Color( 0xbfe3dd );
+        // RoomEnvironment   同于创建室内逼真环境的类
+        scene.environment = pmremGenerator.fromScene( new RoomEnvironment( renderer ), 0.04 ).texture; // 设置场景环境贴图
+
+
+        stats = new Stats();
+		document.body.appendChild( stats.dom );
+
+        window.addEventListener( 'resize', onWindowResize );
+
+        // 设置相机控件轨道控制器OrbitControls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(1,0,0);
+        controls.enableRotate = false; // 禁止鼠标左键旋转
+        controls.addEventListener('change', function () {
+            renderer.render(scene, camera); //执行渲染操作
+        });
+  
+          // AxesHelper：辅助观察的坐标系
+        const axesHelper = new AxesHelper(150);
+        // axesHelper.visible = false;
+        // scene.add(axesHelper);
+
+      // gltf 压缩库
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('../draco/gltf/');
+
+      // 加载模型
+      const loader = new GLTFLoader();
+        loader.setDRACOLoader( dracoLoader );
+        loader.load( '../models/gltf/LittlestTokyo.glb', function ( gltf ) {
+          model = gltf.scene;
+          model.position.set( 1, 1, 0 );
+		  model.scale.set( 0.01, 0.01, 0.01 );
+          scene.add(model)
+      
+          mixer = new AnimationMixer( model );
+          mixer.clipAction( gltf.animations[ 0 ]).play();
+
+          animate();
+          createCameraTween();
+      })
+
+    }
+
+    function createCameraTween(){
+      let tweenStep1 =  new TWEEN.Tween({
+            // 不管相机此刻处于什么状态，直接读取当前的位置和目标观察点
+            x: camera.position.x,
+            y: camera.position.y,
+            z: camera.position.z,
+            tx: controls.target.x,
+            ty: controls.target.y,
+            tz: controls.target.z,
+        })
+        .to({
+            // 动画结束相机位置坐标
+            x: 0,
+            y: 0,
+            z: 8,
+            // 动画结束相机指向的目标观察点
+            tx: 1,
+            ty: 1,
+            tz: 0,
+        },5000).delay(3000)
+        .onUpdate(function (obj) {
+            // 动态改变相机位置
+            camera.position.set(obj.x, obj.y, obj.z);
+            // 动态计算相机视线
+            // camera.lookAt(obj.tx, obj.ty, obj.tz);
+            controls.target.set(obj.tx, obj.ty, obj.tz);
+            controls.update();//内部会执行.lookAt()
+        }).start();
+        
+      
+      let tweenStep2 = new TWEEN.Tween({
+            ry:0,
+        })
+        .to({
+            ry:Math.PI/2,
+        },5000).delay(3000)
+        .onUpdate(function (obj) {
+            model.rotation.y = obj.ry;
+        })
+
+        let tweenStep3 = new TWEEN.Tween({
+            ry:Math.PI/2,
+        })
+        .to({
+            ry:Math.PI,
+        },5000).delay(3000)
+        .onUpdate(function (obj) {
+            model.rotation.y = obj.ry;
+           
+        })
+        let tweenStep4 = new TWEEN.Tween({
+            ry:Math.PI,
+        })
+        .to({
+            ry:Math.PI*1.5,
+        },5000).delay(3000)
+        .onUpdate(function (obj) {
+            model.rotation.y = obj.ry;
+           
+        })
+
+        let tweenStep5 = new TWEEN.Tween({
+            ry:Math.PI*1.5,
+        })
+        .to({
+            ry:Math.PI*1.9,
+        },3000).delay(3000)
+        .onUpdate(function (obj) {
+            model.rotation.y = obj.ry;
+        }).onComplete(function(){
+            controls.enableRotate = true;
+        })
+        tweenStep1.chain(tweenStep2);
+        tweenStep2.chain(tweenStep3);
+        tweenStep3.chain(tweenStep4);
+        tweenStep4.chain(tweenStep5);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+
+    function animate(){
+      requestAnimationFrame( animate );
+
+      const delta = clock.getDelta();
+      mixer.update(delta);
+
+      TWEEN.update();
+      controls.update();
+      render();
+			stats.update();
+    }
+
+    function render(){
+        renderer.render( scene, camera );
+    }
+
+
+  </script>
+</body>
+
+</html>
