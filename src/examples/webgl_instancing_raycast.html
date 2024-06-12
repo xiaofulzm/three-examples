@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <title>three.js webgl - instancing - raycast</title>
   <link type="text/css" rel="stylesheet" href="main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/20.0.0/tween.umd.js"></script>
 
 
 <body>
@@ -57,20 +58,22 @@
     let camera,controls,scene,renderer,stats,mesh,axesHelper
 
     const amount = parseInt( window.location.search.slice( 1 ) ) || 10; // 每排数量多少
-    const count = Math.pow( amount, 3 );
+    const count = Math.pow( amount, 3);
 
     const raycaster = new Raycaster();  // 定义射线投射器
     const mouse = new Vector2( 1, 1 ); // 定义存储鼠标位置二维数据
 
     const color = new Color();
     const white = new Color().setHex( 0xffffff );
+    
+    let randomIndexs = [], cubeIndexs = [], planeIndexs = [];
 
     init();
     animate();
     function init(){
 
         camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000 );
-        camera.position.set( amount, amount, amount );
+        camera.position.set( amount*2, amount*2, amount*2 );
         camera.lookAt( 0, 0, 0 );
 
         scene = new Scene();
@@ -90,8 +93,37 @@
         mesh = new InstancedMesh(geometry,material,count);  // InstancedMesh 用来渲染大量具有相同几何体与材质、但具有不同世界变换的物体
         
         scene.add(mesh)
-        initMesh();
+        const matrix = new Matrix4(); // 四维矩阵
+        for ( let i = 0; i < count; i++ ) {
+            const x = Math.random()>0.5?-Math.random()*50:Math.random()*50,
+                  y = Math.random()>0.5?-Math.random()*50:Math.random()*50,
+                  z = Math.random()>0.5?-Math.random()*50:Math.random()*50;
+            matrix.setPosition(x,y,z)
+            mesh.setMatrixAt( i, matrix ); // 单个设置位置, 颜色
+            mesh.setColorAt( i, color );
+            randomIndexs.push(x,y,z);
+        }
         
+        const offset = ( amount - 1 ) / 2; // 距离
+        // 立方体
+        for ( let x = 0; x < amount; x ++ ) {
+          for (let y = 0; y < amount; y ++ ){
+            for (let z = 0; z < amount; z ++ ){
+              cubeIndexs.push(offset-x,offset-y,offset-z);
+            }
+          }
+        }
+
+        // 平面
+        let countSqrt = Math.ceil(Math.sqrt(count));
+        const cubeOffset = ( countSqrt - 1 ) / 2; // 距离
+        for ( let x = 0; x < countSqrt; x ++ ) {
+          for (let y = 0; y < countSqrt; y ++ ){
+            planeIndexs.push( cubeOffset-x,cubeOffset-y,0)
+          }
+        }
+
+        initMesh();
         
         createPanel()
 
@@ -117,29 +149,8 @@
 
     }
 
-    function initMesh(isColor=true){
-        let i = 0;
-		    const offset = ( amount - 1 ) / 2; // 距离
-        const matrix = new Matrix4(); // 四维矩阵
-
-        // 循环设置位置, x y z
-        for ( let x = 0; x < amount; x ++ ) {
-
-          for (let y = 0; y < amount; y ++ ){
-           
-            for (let z = 0; z < amount; z ++ ){
-              
-                matrix.setPosition(offset-x,offset-y,offset-z)
-                mesh.setMatrixAt( i, matrix ); // 单个设置位置, 颜色
-                if(isColor){
-                  mesh.setColorAt( i, color );
-                }
-                i++;
-            }
-          }
-          
-        }
-       
+    function initMesh(){
+      createTween(randomIndexs,cubeIndexs);
     }
 
     // gui 设置
@@ -162,22 +173,10 @@
         });
 
         shapeControls .push(gui.add({'平面':function(){
+
+            createTween(cubeIndexs,planeIndexs);
             
-            let countSqrt = Math.ceil(Math.sqrt(mesh.count));
-            const offset = ( countSqrt - 1 ) / 2; // 距离
-            const matrix = new Matrix4(); // 四维矩阵
-            let i = 0;
-            for ( let x = 0; x < countSqrt; x ++ ) {
-              for (let y = 0; y < countSqrt; y ++ ){
-                  matrix.setPosition(offset-x,offset-y,0)
-                  mesh.setMatrixAt(i,matrix); // 单个设置位置, 颜色
-                  i++
-              }
-            }
-            
-            camera.position.set( 0, 0,countSqrt);
-            mesh.instanceMatrix.needsUpdate = true; 
-            mesh.computeBoundingSphere(); // 计算当前几何体的的边界球形
+            camera.position.set( 0, 0, 40);
 
             shapeControls[0].disable();
             shapeControls[1].enable();
@@ -185,14 +184,50 @@
         }},'平面'));
 
         shapeControls .push(gui.add({'立方体':function(){
-            initMesh(false);
-            camera.position.set( amount, amount, amount);
-            mesh.instanceMatrix.needsUpdate = true; 
-            mesh.computeBoundingSphere(); // 计算当前几何体的的边界球形
+
+            createTween(planeIndexs,cubeIndexs);
+            camera.position.set( amount*2, amount*2, amount*2);
 
             shapeControls[0].enable();
             shapeControls[1].disable();
         }},'立方体').disable());
+    }
+
+    function createTween(start,end){
+
+      const froms = Array.from(start);
+      const tos = Array.from(end);
+      let toArr = [];
+   
+      if(froms.length === tos.length){
+        toArr = tos
+      }else if(froms.length < tos.length){
+
+        toArr = tos.splice(0,froms.length);
+
+      }else if(froms.length > tos.length){
+
+        const newArr = [];
+        for (let i = 0; i < froms.length - tos.length; i++) {
+          newArr.push(Math.random()>0.5?-Math.random()*30:Math.random()*30);
+        }
+        toArr = tos.concat(newArr);
+
+      }
+
+      const mat4 = new Matrix4();
+
+      new TWEEN.Tween(froms)
+      .to(toArr,1500)
+      .onUpdate(function (obj) {
+          for (let i = 0; i < obj.length; i+=3) {
+            
+              mat4.setPosition(obj[i],obj[i+1],obj[i+2])
+              mesh.setMatrixAt(i/3,mat4);
+          }
+          mesh.instanceMatrix.needsUpdate = true; 
+      })
+      .start();
     }
 
     // 更新场景
@@ -214,7 +249,10 @@
     animate()
     function animate(){
         requestAnimationFrame( animate );
+
         controls.update();
+
+        TWEEN.update();
 
         raycaster.setFromCamera(mouse,camera); //.setFromCamera()计算射线投射器`Raycaster`的射线属性.ray
         //.intersectObjects(mesh)对参数中的网格模型对象进行射线交叉计算

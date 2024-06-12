@@ -22,5 +22,13 @@
         "original_address":"",
         "keyword ":"DRACOLoader",
         "type":"webgl"
+    },
+    {
+        "title":"webgl_materials_cubemap_dynamic",
+        "name":"天空盒",
+        "address":"",
+        "original_address":"",
+        "keyword ":"CubeCamera",
+        "type":"webgl"
     }
 ]

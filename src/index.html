@@ -12,7 +12,9 @@
 </head>
 <body> 
     <div class="panel panel-fold" id="panel" >
-        <ul class="p-list"  id="p-list"></ul>
+        <div class="overflow-wrap" >
+            <ul class="p-list"  id="p-list"></ul>
+        </div>
         <svg  id="fold" t="1716129782261" class="fold-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="17449" width="40" height="40"><path d="M501.792 264.544c12.8 12.8 12.384 33.664-0.928 45.952l-192.864 177.984a32 32 0 0 0 0 47.04l192.864 177.984a31.872 31.872 0 1 1-43.36 46.72L242.016 558.72a64 64 0 0 1 0-93.504l215.488-201.44a31.872 31.872 0 0 1 44.288 0.736z m288 0c12.8 12.8 12.384 33.664-0.928 45.952l-192.864 177.984a32 32 0 0 0 0 47.04l192.864 177.984a31.872 31.872 0 1 1-43.36 46.72l-215.488-201.472a64 64 0 0 1 0-93.504l215.488-201.44a31.872 31.872 0 0 1 44.288 0.736z" fill="#ffffff" p-id="17450"></path></svg>
     </div>
     <iframe id="viewer" class="viewer" ></iframe>
@@ -72,6 +74,7 @@
                     <h6 class="e_h6" >${obj.name}</h6>
                 </div>
             `.trim()
+            // <h6 class="e_h6" >${obj.name}</h6>
         }
 
         function setViewerSrc(index =0){
