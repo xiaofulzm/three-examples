@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>three.js webgl - geometry - text</title>
+  <link type="text/css" rel="stylesheet" href="main.css">
+
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+
+    import {
+      WebGLRenderer,
+      PerspectiveCamera,
+      Scene,
+      Fog,
+      Color,
+      AxesHelper,
+      HemisphereLight,
+      HemisphereLightHelper,
+      DirectionalLight,
+      PointLight,
+      Mesh,
+      MeshPhongMaterial,
+      Clock,
+      LoopOnce,
+      Group,
+      PlaneGeometry,
+      MeshBasicMaterial,
+      Cache
+    } from 'three';
+
+    import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+    import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    let camera, scene, renderer, stats, axesHelper,pointLight;
+
+    let group, materials, font, textGeo,textMesh,textMesh2;
+
+    let bevelEnabled = false;
+    const   hover = 30;
+
+    let targetRotation = 0;
+    let targetRotationOnPointerDown = 0;
+
+    let pointerX = 0;
+    let pointerXOnPointerDown = 0;
+
+    let windowHalfX = window.innerWidth / 2;
+
+    console.log(Cache);
+    Cache.enabled = true;
+
+    init();
+    function init() {
+
+      //相机
+      camera = new PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
+      camera.position.set(0, 400, 700);
+      camera.lookAt(0,150,0);
+
+      // 场景
+      scene = new Scene();
+      scene.background = new Color(0x000000);
+      scene.fog = new Fog(0x000000, 250, 1400);  // 添加场景雾
+
+      // 平行光
+      const dirLight = new DirectionalLight(0xffffff, 0.4);
+      dirLight.position.set(0, 0, 1).normalize();
+      scene.add(dirLight);
+
+      // 点光源
+      pointLight = new PointLight(0xffffff, 4.5, 0, 0);
+      pointLight.color.setHSL(Math.random(), 1, 0.5);
+      pointLight.position.set(0, 100, 90);
+      scene.add(pointLight);
+
+      // AxesHelper：辅助观察的坐标系
+      axesHelper = new AxesHelper(150);
+      axesHelper.visible = false;
+      scene.add(axesHelper);
+
+
+      // 显示电脑渲染帧率
+      stats = new Stats();
+      document.body.appendChild(stats.dom);
+
+      // 渲染
+      renderer = new WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setAnimationLoop(animate);
+      document.body.appendChild(renderer.domElement);
+
+      window.addEventListener('resize', onWindowResize);
+
+      renderer.domElement.addEventListener( 'pointerdown', onPointerDown );
+      
+      // MeshPhongMaterial: 镜面高光材质;     flatShading : 定义材质是否使用平面着色进行渲染。默认值为false。
+      materials = [
+        new MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
+        new MeshPhongMaterial({ color: 0xffffff }) // side
+      ];
+
+      // 组
+      group = new Group();
+      group.position.y = 100;
+      scene.add(group);
+
+      // 添加镜面平面
+      const plane = new Mesh(
+        new PlaneGeometry(10000, 10000),
+        new MeshBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
+      );
+      plane.rotation.x = - Math.PI / 2;
+      plane.position.y = 100;
+      scene.add(plane);
+
+      // 加载文本
+      const loader = new FontLoader();
+      // ../models/fonts/fu-Light.json
+      // helvetiker_bold.typeface.json
+      loader.load('../models/fonts/fu_MaShanZheng.json', function (res) {
+        font = res;
+        refreshText();
+        createPanel();
+      })
+
+    }
+    
+    function createText(){
+        // 
+        textGeo = new TextGeometry('空山新雨后', {
+          font: font,
+          size: 60,  // 字体大小
+          height: 6, // 字体宽度
+          curveSegments: 4, // 曲线上点的数量
+          bevelEnabled: bevelEnabled, // 是否开启斜角
+          bevelThickness:6, // 文本上斜角的深度
+          bevelSize: 1.5,   // 斜角与原始文本轮廓之间的延伸距离
+        });
+     
+        textGeo.computeBoundingBox(); // 计算外边界
+        const centerOffset = - (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x) / 2; // 模型居中 
+
+        textMesh = new Mesh(textGeo, materials);
+
+        textMesh.position.x = centerOffset;
+        textMesh.position.y = hover;
+        textMesh.position.z = 0;
+
+        textMesh.rotation.x = 0;
+        textMesh.rotation.y = Math.PI * 2;
+
+        group.add(textMesh);
+
+
+        // 文字倒影
+        textMesh2 = new Mesh(textGeo, materials);
+
+        textMesh2.position.x = centerOffset;
+        textMesh2.position.y = - hover;
+        textMesh2.position.z = 0;
+
+        textMesh2.rotation.x = Math.PI;
+        textMesh2.rotation.y = Math.PI * 2;
+
+        group.add(textMesh2);
+    }
+    function refreshText() {
+
+        group.remove( textMesh );
+        group.remove( textMesh2 );
+
+        createText();
+
+    }
+     // gui 设置
+     function createPanel(){
+
+      const gui = new GUI();
+
+        gui.add({'修改颜色':function(){
+            pointLight.color.setHSL( Math.random(), 1, 0.5 );
+        }},'修改颜色');
+
+        gui.add({'是否开启斜角':false},'是否开启斜角').onChange((visible) => { 
+          bevelEnabled = visible;
+          refreshText();
+        });
+
+      }
+
+    // 鼠标按下
+    function onPointerDown(event) {
+
+      if (event.isPrimary === false) return;
+
+      pointerXOnPointerDown = event.clientX - windowHalfX;
+      targetRotationOnPointerDown = targetRotation;
+
+      renderer.domElement.addEventListener('pointermove', onPointerMove);
+      renderer.domElement.addEventListener('pointerup', onPointerUp);
+
+    }
+
+    // 鼠标移动
+    function onPointerMove(event) {
+
+      if (event.isPrimary === false) return;
+
+      pointerX = event.clientX - windowHalfX;
+
+      targetRotation = targetRotationOnPointerDown + (pointerX - pointerXOnPointerDown) * 0.02;
+
+    }
+
+    // 鼠标抬起
+    function onPointerUp() {
+
+      if (event.isPrimary === false) return;
+
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointerup', onPointerUp);
+
+    }
+
+
+    // 更新场景
+    function onWindowResize() {
+      windowHalfX = window.innerWidth / 2;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+
+      group.rotation.y += ( targetRotation - group.rotation.y ) * 0.05;
+
+      renderer.clear();
+      renderer.render(scene, camera);
+      stats.update();
+    }
+
+
+  </script>
+</body>
+
+</html>

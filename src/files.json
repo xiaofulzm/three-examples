@@ -33,10 +33,26 @@
     },
     {
         "title":"webgl_materials_video",
-        "name":"风景视频",
+        "name":"视频贴图",
         "address":"",
         "original_address":"",
         "keyword ":"VideoTexture",
+        "type":"webgl"
+    },
+    {
+        "title":"webgl_geometry_text",
+        "name":"3D文字",
+        "address":"",
+        "original_address":"",
+        "keyword ":"FontLoader,TextGeometry",
+        "type":"webgl"
+    },
+    {
+        "title":"webgl_edges_view",
+        "name":"边缘几何",
+        "address":"",
+        "original_address":"",
+        "keyword ":"EdgesGeometry,setScissorTest",
         "type":"webgl"
     }
 ]
