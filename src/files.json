@@ -54,6 +54,14 @@
         "original_address":"",
         "keyword ":"EdgesGeometry,setScissorTest",
         "type":"webgl"
+    },
+    {
+        "title":"shader-case",
+        "name":"shader案例",
+        "address":"",
+        "original_address":"",
+        "keyword ":"shader",
+        "type":"webgl"
     }
 ]
 

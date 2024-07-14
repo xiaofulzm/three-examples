@@ -231,14 +231,11 @@
 
     // 鼠标抬起
     function onPointerUp() {
-
       if (event.isPrimary === false) return;
-
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
 
     }
-
 
     // 更新场景
     function onWindowResize() {

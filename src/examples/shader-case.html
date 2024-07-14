@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <title>three.js webgl - shader - case</title>
+  <link type="text/css" rel="stylesheet" href="main.css">
+
+
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+
+    import { 
+      WebGLRenderer,
+      PerspectiveCamera,
+      Scene,
+      Fog,
+      Color,
+      AxesHelper,
+      Mesh,
+      PlaneGeometry,
+      MeshPhongMaterial,
+      Clock,
+      ShaderMaterial
+    } from 'three';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js?';
+
+    
+		import Stats from 'three/addons/libs/stats.module.js';
+		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    let materialList = [];
+    
+    // 场景、摄像机和渲染器设置
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 60;
+    const renderer = new WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+      
+    // 显示电脑渲染帧率
+    const stats = new Stats();
+    document.body.appendChild(stats.dom);
+
+    let controls = new OrbitControls(camera, renderer.domElement);
+
+    // 创建平面几何体
+    const geometry = new PlaneGeometry(10,10);
+      
+    // 创建材质
+    const material = new ShaderMaterial();
+      
+    for(let i =0;i<50;i++ ){
+      materialList.push(material.clone())
+    }
+
+    // 案例1
+    materialList[0].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[0].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(uv,1.,1.);
+
+      }
+    `
+
+     // 案例2
+     materialList[1].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[1].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(uv,0.,1.);
+
+      }
+    `
+    
+     // 案例3
+     materialList[2].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[2].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(vec3(uv.x),1.);
+
+      }
+    ` 
+
+    // 案例4
+     materialList[3].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[3].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(vec3(uv.y),1.);
+
+      }
+    `
+    
+     // 案例5
+     materialList[4].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[4].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(1.-vec3(uv.y),1.);
+
+      }
+    `
+
+        
+     // 案例6
+     materialList[5].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 由于无法显示比白色更亮的颜色，因此其余渐变将保持白色  1~0
+    materialList[5].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        gl_FragColor=vec4(vec3(uv.y)*10.,1.);
+
+      }
+    `
+     // 案例7
+    materialList[6].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 模运算，模运算返回两数之间的余数  0.8%1.0 = 0.8, 1.2%1.0=0.2
+    // glsl mod(1.2,1.0) = 0.2
+    materialList[6].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength  =mod(uv.y*10.,1.0);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+    
+    // 案例8
+    materialList[7].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    //  内置函数step:  接收两个参数：edge 表示一个临界值，第二个参数 value 是传入的参数，当传入参数小于临界值时，该方法返回 0.0，当传入参数大于临界值时，该方法返回 1.0
+    materialList[7].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength  =mod(uv.y*10.,1.0);
+        strength = step(.5,strength);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例9
+    materialList[8].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 修改临界值
+    materialList[8].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength  =mod(uv.y*10.,1.0);
+        strength = step(.8,strength);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+    
+     // 案例10
+     materialList[9].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 换成x轴
+    materialList[9].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength  =mod(uv.x*10.,1.0);
+        strength = step(.8,strength);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+      // 案例11
+    materialList[10].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 将x轴与y轴相加 可以得到结合的效果
+    materialList[10].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = step(.8,mod(uv.x*10.,1.));
+        strength += step(.8,mod(uv.y*10.,1.));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+    
+    // 案例12
+    materialList[11].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 将x轴与y轴相乘 可以得到它们的交集
+    materialList[11].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = step(.8,mod(uv.x*10.,1.));
+        strength *= step(.8,mod(uv.y*10.,1.));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+      // 案例13
+    materialList[12].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 将x轴上step边界 值改成.4
+    materialList[12].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = step(.4,mod(uv.x*10.,1.));
+        strength *= step(.8,mod(uv.y*10.,1.));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例14
+    materialList[13].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 根据上个图案生成的，我们在 x轴 和 y轴 上都创建条形图
+    materialList[13].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float barX = step(.4,mod(uv.x*10.,1.))*step(.8,mod(uv.y*10.,1.));
+        float barY = step(.8,mod(uv.x*10.,1.))*step(.4,mod(uv.y*10.,1.));
+        float strength = barX + barY;
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    ` 
+
+    
+    // 案例15
+    materialList[14].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 在案例14代码的基础上, x轴和y轴条形图上设置一个小便宜
+    materialList[14].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float barX = step(.4,mod(uv.x*10.-.2,1.))*step(.8,mod(uv.y*10.,1.));
+        float barY = step(.8,mod(uv.x*10.,1.))*step(.4,mod(uv.y*10.-.2,1.));
+        float strength = barX + barY;
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+        
+    // 案例16
+    materialList[15].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 给 vUv.x设置一个偏移量  值从 0.5 变化到 0.0 再变化到 0.5
+    // abs: 绝对值
+    materialList[15].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = abs(uv.x-.5);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+     // 案例17
+     materialList[16].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 在 y轴 上也设置了一个变量。这种组合方式不是单纯使用两者的相加结果，而是使用了 x轴 和 y轴 图案的最小值
+    // min函数
+    materialList[16].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = min(abs(uv.x-.5),abs(uv.y-.5));
+       
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例18
+    materialList[17].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 使用max最大值
+    materialList[17].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = max(abs(uv.x-.5),abs(uv.y-.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例19
+    materialList[18].vertexShader =`
+      varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 使用step函数, 实现渐变色变为纯色
+    materialList[18].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = step(.25,max(abs(uv.x-.5),abs(uv.y-.5)));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+      // 案例20
+    materialList[19].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 这个图案是一个正方形图案与另一个更小的反色图案的乘积。
+    materialList[19].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = step(.2,max(abs(uv.x-.5),abs(uv.y-.5)));
+        strength *= 1.- step(.25,max(abs(uv.x-.5),abs(uv.y-.5)));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    
+    // 案例21
+    materialList[20].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // floor方法 向下取整
+    materialList[20].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = floor(uv.x*10.)/10.;
+    
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例22
+    materialList[21].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    //  相乘
+    materialList[21].fragmentShader =`
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = floor(uv.x*10.)/10.*floor(uv.y*10.)/10.;
+    
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例23
+    materialList[22].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    //  使用噪声函数(随机数)
+    materialList[22].fragmentShader =`
+      // 噪声函数
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      }
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        float strength = random(uv);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+     // 案例24
+    materialList[23].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    //  t案例22和案例23结合
+    materialList[23].fragmentShader =`
+      // 噪声函数
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      }
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        vec2 gridUv = vec2(floor(uv.x*10.)/10.,floor(uv.y*10.)/10.);
+        float strength = random(gridUv);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例25
+    materialList[24].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    //  gridUv函数中 uv.x+uv.y
+    materialList[24].fragmentShader =`
+      // 噪声函数
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      }
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+        vec2 gridUv = vec2(floor((uv.x+uv.y)*10.)/10.,floor((uv.y)*10.)/10.);
+        float strength = random(gridUv);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+    
+    // 案例26
+    materialList[25].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // length函数 来获取向量（vec2，vec3，或 vec4）的长度。
+    materialList[25].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = length(uv);
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例27
+    materialList[26].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 获得vUv与平面中心之间的距离
+    // distance函数 获取两个点之间的距离
+    materialList[26].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = distance(uv,vec2(.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+    
+        // 案例28
+    materialList[27].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[27].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = 1. - distance(uv,vec2(.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+      
+    `
+
+    // 案例29
+    materialList[28].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 在创建光照透镜光晕效果时,通过使用一个很小的数除以前面计算的距离结果来得到这个图案
+    materialList[28].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = .015/distance(uv,vec2(.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+        // 案例30
+    materialList[29].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 在案例29的基础上 在y轴上对uv进行挤压和位移
+    materialList[29].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = .15/distance(vec2(uv.x,(uv.y-.5)*5.+.5),vec2(.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    
+    // 案例31
+    materialList[30].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 两个同类型的的运算式相乘生成，但是第二个运算式是基于 x轴 对 UV 进行挤压和位移来实现
+    materialList[30].fragmentShader =`
+
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = vUv;
+      
+        float strength = .15/distance(vec2(uv.x,(uv.y-.5)*5.+.5),vec2(.5));
+        strength *= .15/distance(vec2(uv.y,(uv.x-.5)*5.+.5),vec2(.5));
+        gl_FragColor=vec4(vec3(strength),1.);
+
+      }
+    `
+
+    // 案例32
+    materialList[31].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    materialList[31].fragmentShader =`
+      #define PI 3.1415926535897932384626433832795
+        
+      // 旋转方法  uv向量   rotation旋转角度  mid旋转中心
+        vec2 rotate(vec2 uv, float rotation, vec2 mid) {
+            return vec2(
+              cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
+              cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
+            );
+        }
+
+        varying vec2 vUv;
+        void main() {
+          vec2 uv = vUv;
+          vec2 rotatedUv = rotate(uv,PI*.25,vec2(.5));
+          float strength = .15/distance(vec2(rotatedUv.x,(rotatedUv.y-.5)*5.+.5),vec2(.5));
+          strength *= .15/distance(vec2(rotatedUv.y,(rotatedUv.x-.5)*5.+.5),vec2(.5));
+          gl_FragColor=vec4(vec3(strength),1.);
+
+        }
+    `
+
+    // 案例33
+    materialList[32].vertexShader =`
+    varying vec2 vUv;
+        void main() {
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vUv = uv;
+      }
+    `
+    // 在step 方法中使用distance方法来生成一个偏移量来控制中心圆的半径
+    materialList[32].fragmentShader =`
+
+        varying vec2 vUv;
+        void main() {
+          vec2 uv = vUv;
+     
+          float strength = step(0.5, distance(vUv, vec2(0.5)) + 0.25);
+
+          gl_FragColor=vec4(vec3(strength),1.);
+
+        }
+    `
+
+      // 案例34
+      materialList[33].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+   
+      materialList[33].fragmentShader =`
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = abs(distance(uv, vec2(0.5)) - 0.25);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+      
+      // 案例35
+      materialList[34].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+   
+      materialList[34].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            //  float strength = step(0.01, abs(distance(uv, vec2(0.5)) -0.25));
+            float strength = smoothstep(0.0,.01,abs(distance(uv,vec2(0.5)) - 0.25));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+       
+      // 案例36
+      materialList[35].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+   
+      materialList[35].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            // float strength = 1. - step(0.01, abs(distance(uv, vec2(0.5)) -0.25));
+            float strength = smoothstep(0.01,.0,abs(distance(uv,vec2(0.5)) - 0.25));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+             
+      // 案例37
+      materialList[36].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 基于前一个图案，但是它有一个波浪状的变形效果
+       // 使用 sin() 方法给 y 值增加一个基于 x轴 的值
+      materialList[36].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            vec2 wavedUv = vec2(uv.x,uv.y+sin(uv.x*30.)*.1);
+
+            // float strength = 1. - step(0.01, abs(distance(wavedUv,vec2(0.5)) -0.25));
+            float strength = smoothstep(0.01,.0,abs(distance(wavedUv,vec2(0.5)) - 0.25));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+      // 案例38
+      materialList[37].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 在x轴上也加上
+      materialList[37].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            vec2 wavedUv = vec2(
+              uv.x+sin(uv.y*30.)*.1,
+              uv.y+sin(uv.x*30.)*.1
+            );
+
+            //float strength = 1. - step(0.01, abs(distance(wavedUv,vec2(0.5)) -0.25));
+             float strength = smoothstep(0.01,.0,abs(distance(wavedUv,vec2(0.5)) - 0.25));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+      // 案例39
+      materialList[38].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 增加 sin的频率
+      materialList[38].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            vec2 wavedUv = vec2(
+              uv.x+sin(uv.y*100.)*.1,
+              uv.y+sin(uv.x*100.)*.1
+            );
+
+            //float strength = 1. - step(0.01, abs(distance(wavedUv,vec2(0.5)) -0.25));
+             float strength = smoothstep(0.01,.0,abs(distance(wavedUv,vec2(0.5)) - 0.25));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+      // 案例40
+      materialList[39].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 从 2D 坐标获得一个角度，我们可以使用 atan(...) 方法：
+      materialList[39].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x,uv.y);
+             float strength = angle;
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+       // 案例41
+       materialList[40].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 从 2D 坐标获得一个角度，我们可以使用 atan(...) 方法：
+      materialList[40].fragmentShader =`
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x-.5,uv.y-.5);
+             float strength = angle;
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+      
+      // 案例42
+      materialList[41].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 从 2D 坐标获得一个角度，我们可以使用 atan(...) 方法：
+      materialList[41].fragmentShader =`
+          #define PI 3.1415926535897932384626433832795
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x-.5,uv.y-.5) / ( PI * 2. ) + .5;
+            gl_FragColor=vec4(vec3(angle),1.);
+
+          }
+      `
+
+      // 案例43
+      materialList[42].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 上面的案例进行模运算
+      materialList[42].fragmentShader =`
+          #define PI 3.1415926535897932384626433832795
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x-.5,uv.y-.5) / ( PI * 2. ) + .5;
+            float strength = mod(angle * 30.,1.);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+      // 案例44
+      materialList[43].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用sin 方法
+      materialList[43].fragmentShader =`
+          #define PI 3.1415926535897932384626433832795
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x-.5,uv.y-.5) / ( PI * 2. ) + .5;
+            float strength = sin(angle*100.);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+      // 案例45
+      materialList[44].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用案例35的值来定义绘制的圆的半径
+      materialList[44].fragmentShader =`
+          #define PI 3.1415926535897932384626433832795
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float angle = atan(uv.x-.5,uv.y-.5) / ( PI * 2. ) + .5;
+            float radius = .25 + sin(angle*100.)*.02;
+            float strength = smoothstep(0.01,0.,abs(distance(uv, vec2(0.5)) - radius));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+      // 案例46
+      materialList[45].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用柏林噪声
+      materialList[45].fragmentShader =`
+          vec4 permute(vec4 x) {
+            return mod(((x*34.0)+1.0)*x, 289.0);
+          }
+          
+          vec2 fade(vec2 t) {
+            return t*t*t*(t*(t*6.0-15.0)+10.0);
+          }
+
+          float cnoise(vec2 P) {
+            vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+            vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+            Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+            vec4 ix = Pi.xzxz;
+            vec4 iy = Pi.yyww;
+            vec4 fx = Pf.xzxz;
+            vec4 fy = Pf.yyww;
+            vec4 i = permute(permute(ix) + iy);
+            vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+            vec4 gy = abs(gx) - 0.5;
+            vec4 tx = floor(gx + 0.5);
+            gx = gx - tx;
+            vec2 g00 = vec2(gx.x,gy.x);
+            vec2 g10 = vec2(gx.y,gy.y);
+            vec2 g01 = vec2(gx.z,gy.z);
+            vec2 g11 = vec2(gx.w,gy.w);
+            vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+            g00 *= norm.x;
+            g01 *= norm.y;
+            g10 *= norm.z;
+            g11 *= norm.w;
+            float n00 = dot(g00, vec2(fx.x, fy.x));
+            float n10 = dot(g10, vec2(fx.y, fy.y));
+            float n01 = dot(g01, vec2(fx.z, fy.z));
+            float n11 = dot(g11, vec2(fx.w, fy.w));
+            vec2 fade_xy = fade(Pf.xy);
+            vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+            float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+            return 2.3 * n_xy;
+          }
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = cnoise(uv*10.);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+      
+      // 案例47
+      materialList[46].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用柏林噪声
+      materialList[46].fragmentShader =`
+          vec4 permute(vec4 x) {
+            return mod(((x*34.0)+1.0)*x, 289.0);
+          }
+          
+          vec2 fade(vec2 t) {
+            return t*t*t*(t*(t*6.0-15.0)+10.0);
+          }
+
+          float cnoise(vec2 P) {
+            vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+            vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+            Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+            vec4 ix = Pi.xzxz;
+            vec4 iy = Pi.yyww;
+            vec4 fx = Pf.xzxz;
+            vec4 fy = Pf.yyww;
+            vec4 i = permute(permute(ix) + iy);
+            vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+            vec4 gy = abs(gx) - 0.5;
+            vec4 tx = floor(gx + 0.5);
+            gx = gx - tx;
+            vec2 g00 = vec2(gx.x,gy.x);
+            vec2 g10 = vec2(gx.y,gy.y);
+            vec2 g01 = vec2(gx.z,gy.z);
+            vec2 g11 = vec2(gx.w,gy.w);
+            vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+            g00 *= norm.x;
+            g01 *= norm.y;
+            g10 *= norm.z;
+            g11 *= norm.w;
+            float n00 = dot(g00, vec2(fx.x, fy.x));
+            float n10 = dot(g10, vec2(fx.y, fy.y));
+            float n01 = dot(g01, vec2(fx.z, fy.z));
+            float n11 = dot(g11, vec2(fx.w, fy.w));
+            vec2 fade_xy = fade(Pf.xy);
+            vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+            float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+            return 2.3 * n_xy;
+          }
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = step(0.5,cnoise(uv*10.));
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+       // 案例48
+       materialList[47].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用柏林噪声
+      materialList[47].fragmentShader =`
+          vec4 permute(vec4 x) {
+            return mod(((x*34.0)+1.0)*x, 289.0);
+          }
+          
+          vec2 fade(vec2 t) {
+            return t*t*t*(t*(t*6.0-15.0)+10.0);
+          }
+
+          float cnoise(vec2 P) {
+            vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+            vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+            Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+            vec4 ix = Pi.xzxz;
+            vec4 iy = Pi.yyww;
+            vec4 fx = Pf.xzxz;
+            vec4 fy = Pf.yyww;
+            vec4 i = permute(permute(ix) + iy);
+            vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+            vec4 gy = abs(gx) - 0.5;
+            vec4 tx = floor(gx + 0.5);
+            gx = gx - tx;
+            vec2 g00 = vec2(gx.x,gy.x);
+            vec2 g10 = vec2(gx.y,gy.y);
+            vec2 g01 = vec2(gx.z,gy.z);
+            vec2 g11 = vec2(gx.w,gy.w);
+            vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+            g00 *= norm.x;
+            g01 *= norm.y;
+            g10 *= norm.z;
+            g11 *= norm.w;
+            float n00 = dot(g00, vec2(fx.x, fy.x));
+            float n10 = dot(g10, vec2(fx.y, fy.y));
+            float n01 = dot(g01, vec2(fx.z, fy.z));
+            float n11 = dot(g11, vec2(fx.w, fy.w));
+            vec2 fade_xy = fade(Pf.xy);
+            vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+            float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+            return 2.3 * n_xy;
+          }
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = 1. - cnoise(uv*10.);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+       // 案例49
+       materialList[48].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用柏林噪声
+      materialList[48].fragmentShader =`
+          vec4 permute(vec4 x) {
+            return mod(((x*34.0)+1.0)*x, 289.0);
+          }
+          
+          vec2 fade(vec2 t) {
+            return t*t*t*(t*(t*6.0-15.0)+10.0);
+          }
+
+          float cnoise(vec2 P) {
+            vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+            vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+            Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+            vec4 ix = Pi.xzxz;
+            vec4 iy = Pi.yyww;
+            vec4 fx = Pf.xzxz;
+            vec4 fy = Pf.yyww;
+            vec4 i = permute(permute(ix) + iy);
+            vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+            vec4 gy = abs(gx) - 0.5;
+            vec4 tx = floor(gx + 0.5);
+            gx = gx - tx;
+            vec2 g00 = vec2(gx.x,gy.x);
+            vec2 g10 = vec2(gx.y,gy.y);
+            vec2 g01 = vec2(gx.z,gy.z);
+            vec2 g11 = vec2(gx.w,gy.w);
+            vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+            g00 *= norm.x;
+            g01 *= norm.y;
+            g10 *= norm.z;
+            g11 *= norm.w;
+            float n00 = dot(g00, vec2(fx.x, fy.x));
+            float n10 = dot(g10, vec2(fx.y, fy.y));
+            float n01 = dot(g01, vec2(fx.z, fy.z));
+            float n11 = dot(g11, vec2(fx.w, fy.w));
+            vec2 fade_xy = fade(Pf.xy);
+            vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+            float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+            return 2.3 * n_xy;
+          }
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = sin(cnoise(uv*10.)*20.);
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+      // 案例50
+      materialList[49].vertexShader =`
+      varying vec2 vUv;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vUv = uv;
+        }
+      `
+       // 使用柏林噪声
+      materialList[49].fragmentShader =`
+          vec4 permute(vec4 x) {
+            return mod(((x*34.0)+1.0)*x, 289.0);
+          }
+          
+          vec2 fade(vec2 t) {
+            return t*t*t*(t*(t*6.0-15.0)+10.0);
+          }
+
+          float cnoise(vec2 P) {
+            vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+            vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+            Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+            vec4 ix = Pi.xzxz;
+            vec4 iy = Pi.yyww;
+            vec4 fx = Pf.xzxz;
+            vec4 fy = Pf.yyww;
+            vec4 i = permute(permute(ix) + iy);
+            vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+            vec4 gy = abs(gx) - 0.5;
+            vec4 tx = floor(gx + 0.5);
+            gx = gx - tx;
+            vec2 g00 = vec2(gx.x,gy.x);
+            vec2 g10 = vec2(gx.y,gy.y);
+            vec2 g01 = vec2(gx.z,gy.z);
+            vec2 g11 = vec2(gx.w,gy.w);
+            vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+            g00 *= norm.x;
+            g01 *= norm.y;
+            g10 *= norm.z;
+            g11 *= norm.w;
+            float n00 = dot(g00, vec2(fx.x, fy.x));
+            float n10 = dot(g10, vec2(fx.y, fy.y));
+            float n01 = dot(g01, vec2(fx.z, fy.z));
+            float n11 = dot(g11, vec2(fx.w, fy.w));
+            vec2 fade_xy = fade(Pf.xy);
+            vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+            float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+            return 2.3 * n_xy;
+          }
+
+          varying vec2 vUv;
+          void main() {
+            vec2 uv = vUv;
+            float strength = step(0.9,sin(cnoise(uv*10.)*20.)) ;
+            // vec3 blackColor = vec3(0.0);
+            // vec3 uvColor = vec3(.1,.2,.3);
+            // vec3 mixedColor = mix(blackColor, uvColor, strength);
+            // vec3 color = vec3(.1,.2,.3)*strength;
+            gl_FragColor=vec4(vec3(strength),1.);
+
+          }
+      `
+
+    // 创建平面并添加到场景
+    let index = 0;
+    for(let x =0;x<10;x++ ){
+      for(let y =0;y<5;y++ ){
+        const plane = new Mesh(geometry, materialList[index]);
+        plane.position.x = x*12 - 55;
+        plane.position.y = 20 - y*12;
+        scene.add(plane);
+        index++
+      }
+    }
+    
+    // 更新场景
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // 设置摄像机位置并开始渲染循环
+    function animate() {
+      requestAnimationFrame(animate);
+
+      stats.update();
+      // 更新时间并渲染场景
+      renderer.render(scene, camera);
+    }
+    animate();
+ 
+
+  </script>
+</body>
+
+</html>
