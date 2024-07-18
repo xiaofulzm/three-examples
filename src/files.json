@@ -62,6 +62,22 @@
         "original_address":"",
         "keyword ":"shader",
         "type":"webgl"
+    },
+    {
+        "title":"webgl-shader-cnoise",
+        "name":"shader案例",
+        "address":"",
+        "original_address":"",
+        "keyword ":"shader",
+        "type":"webgl"
+    },
+    {
+        "title":"webgl-shader-cnoise2",
+        "name":"shader案例",
+        "address":"",
+        "original_address":"",
+        "keyword ":"shader",
+        "type":"webgl"
     }
 ]
 
